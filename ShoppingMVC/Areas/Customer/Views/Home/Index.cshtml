@@ -1,0 +1,58 @@
+﻿@model ProductDisplay
+
+<div>
+    <form asp-action="Index" class="row row-cols-lg-auto g-3 align-items-center" id="filterForm">
+        <div class="col-12">
+            <label class="visually-hidden" for="inlineFormSelectCategory">Category</label>
+            <select class="form-select" id="categoryId" name="categoryId">
+                <option selected>Filter...</option>
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category.Id">@category.Name</option>
+                }            
+            </select>
+        </div>
+
+        <div class="col-12">
+            <label class="visually-hidden" for="inlineFormInputSearch">Search title</label>
+            <div class="input-group">
+                <input type="text" class="form-control" id="searchQuery" name="searchQuery" placeholder="Search title">
+            </div>
+        </div>
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Search</button>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-dark">Reset</a>
+        </div>
+    </form>
+</div>
+
+<div id="productListContainer" class="row pb-3 mt-4">
+    @foreach (var product in Model.Products)
+    {
+        <div class="col-lg-3 col-sm-6">
+            <div class="row p-2">
+                <div class="col p-1">
+                    <div class="card border-0 p-3 shadow border-top border rounded">
+                        <div>
+                            <p class="badge">@product.Category.Name</p>
+                        </div>
+                        <img src="@product.ImageUrl" class="card-img-top rounded"></img>
+                        <div class="card-body pb-0">
+                            <div class="pl-1">
+                                <p class="card-title h5 text-dark text-opacity-75 text-uppercase text-center">@product.Title</p>
+                                <p class="card-title text-warning text-center">by <b>@product.Author</b></p>
+                            </div>
+                            <div class="pl-1">
+                                <p class="text-dark text-opacity-75 text-center"><span>@product.ListPrice.ToString("c")</span></p>
+                            </div>
+                        </div>
+                        <div>
+                            <a asp-action="Detail" asp-route-productId="@product.Id" class="btn btn-primary bg-gradient border-0 form-control">Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
