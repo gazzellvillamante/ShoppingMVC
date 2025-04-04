@@ -24,17 +24,18 @@ namespace ShoppingMVC.DataAccess.Repository
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
         }
-        public async Task<int> AddItem(int ProductId, int qty)
+        public async Task<int> AddItem(int productId, int qty)
         {
             string userId = GetUserId();
-            using var transaction = _db.Database.BeginTransaction();
+            using var transaction = await _db.Database.BeginTransactionAsync();
             try
             {
                 if (string.IsNullOrEmpty(userId))
                 {
-                    throw new UnauthorizedAccessException("user is not logged-in");
+                    throw new UnauthorizedAccessException("User is not logged in");
                 }
-                    
+
+                // Get the user's shopping cart (or create a new one if none exists)
                 var cart = await GetCart(userId);
                 if (cart == null)
                 {
@@ -43,38 +44,53 @@ namespace ShoppingMVC.DataAccess.Repository
                         UserId = userId
                     };
                     _db.ShoppingCarts.Add(cart);
+                    await _db.SaveChangesAsync(); // Commit the cart creation first
                 }
-                _db.SaveChanges();
 
-
-                // cart detail section
+                // Check if the product already exists in the cart
                 var cartItem = _db.CartDetails
-                                  .FirstOrDefault(a => a.ShoppingCartId == cart.Id && a.ProductId == ProductId);
+                                  .FirstOrDefault(a => a.ShoppingCartId == cart.Id && a.ProductId == productId);
+
                 if (cartItem != null)
                 {
+                    // Product already exists in the cart, increase the quantity
                     cartItem.Quantity += qty;
                 }
                 else
                 {
-                    var product = _db.Products.Find(ProductId);
+                    // Product does not exist in the cart, add it as a new item
+                    var product = await _db.Products.FindAsync(productId);
+                    if (product == null)
+                    {
+                        throw new InvalidOperationException("Product not found");
+                    }
+
                     cartItem = new CartDetail
                     {
-                        ProductId = ProductId,
+                        ProductId = productId,
                         ShoppingCartId = cart.Id,
                         Quantity = qty,
-                        //ListPrice = product.ListPrice 
+                        ListPrice = product.ListPrice // Make sure to store the product's price
                     };
                     _db.CartDetails.Add(cartItem);
                 }
-                _db.SaveChanges();
-                transaction.Commit();
+
+                // Save changes to the cart details
+                await _db.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                // Return the updated item count in the cart
+                var cartItemCount = await GetCartItemCount(userId);
+                return cartItemCount;
             }
             catch (Exception ex)
             {
+                // Handle the exception (you may log it here if necessary)
+                await transaction.RollbackAsync();
+                throw new InvalidOperationException("Error occurred while adding item to the cart", ex);
             }
-            var cartItemCount = await GetCartItemCount(userId);
-            return cartItemCount;
         }
+
 
 
         public async Task<int> RemoveItem(int productId)
@@ -84,42 +100,47 @@ namespace ShoppingMVC.DataAccess.Repository
             {
                 if (string.IsNullOrEmpty(userId))
                 {
-                    throw new UnauthorizedAccessException("user is not logged-in");
+                    throw new UnauthorizedAccessException("User is not logged in");
                 }
-                    
+
                 var cart = await GetCart(userId);
                 if (cart == null)
                 {
                     throw new InvalidOperationException("Invalid cart");
                 }
-                    
-                
-                // cart detail section
+
+                // Find the cart item to remove or reduce quantity
                 var cartItem = _db.CartDetails
                                   .FirstOrDefault(a => a.ShoppingCartId == cart.Id && a.ProductId == productId);
                 if (cartItem == null)
                 {
-                    throw new InvalidOperationException("No items in cart");
+                    throw new InvalidOperationException("Product not found in cart");
                 }
-                    
-                else if (cartItem.Quantity == 1)
+
+                // Decrease the quantity or remove the product completely
+                if (cartItem.Quantity == 1)
                 {
                     _db.CartDetails.Remove(cartItem);
                 }
-                    
                 else
                 {
-                    cartItem.Quantity = cartItem.Quantity - 1;
+                    cartItem.Quantity -= 1; // Decrease the quantity by 1
                 }
-                    
-                _db.SaveChanges();
+
+                // Save changes to the cart
+                await _db.SaveChangesAsync();
+
+                // Return the updated item count in the cart
+                var cartItemCount = await GetCartItemCount(userId);
+                return cartItemCount;
             }
             catch (Exception ex)
             {
+                // Handle the exception (you may log it here if necessary)
+                throw new InvalidOperationException("Error occurred while removing item from the cart", ex);
             }
-            var cartItemCount = await GetCartItemCount(userId);
-            return cartItemCount;
         }
+
 
         public async Task<ShoppingCart> GetUserCart()
         {

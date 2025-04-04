@@ -35,14 +35,14 @@
                         @* Increase Quantity button should be invisible if not enough stock*@
                         @if (item.Quantity < item.Product.Stock)
                         {
-                            <a class="btn btn-info" href="/Cart/AddItem?bookId=@item.ProductId&&redirect=1">+</a>
+                            <a class="btn btn-info" href="@Url.Action("AddItem", "Cart", new { productId = item.ProductId, qty = 1, redirect = 1 })">+</a>
                         }
                         else
                         {
                             <span style="border: 1px solid;padding: 8px 8px;color: red;border-radius: 5px;margin-right:4px">Out of stock </span>
                         }
                         @* Decrement button *@
-                        <a class="btn btn-info" href="/cart/removeitem?bookid=@item.ProductId">-</a>
+                        <a class="btn btn-info" href="@Url.Action("RemoveItem", "Cart", new { productId = item.ProductId })">-</a>
                     </td>
                 </tr>
             }

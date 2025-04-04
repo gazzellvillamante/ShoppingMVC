@@ -19,18 +19,21 @@ namespace ShoppingMVC.Areas.Customer.Controllers
         [Route("Cart/AddItem")]
         public async Task<IActionResult> AddItem(int productId, int qty = 1, int redirect = 0)
         {
-            var cartCount = await _cartRepo.AddItem(productId, qty);
+            var cartCount = await _cartRepo.AddItem(productId, qty);  // Ensure repository handles updating the quantity.
             if (redirect == 0)
                 return Ok(cartCount);
             return RedirectToAction("GetUserCart");
         }
 
+
+        // RemoveItem Action
         [Route("Cart/RemoveItem")]
         public async Task<IActionResult> RemoveItem(int productId)
         {
-            var cartCount = await _cartRepo.RemoveItem(productId);
+            var cartCount = await _cartRepo.RemoveItem(productId);  // Ensure repository handles quantity decrement.
             return RedirectToAction("GetUserCart");
         }
+
 
         [Route("Cart/GetUserCart")]
         public async Task<IActionResult> GetUserCart()
