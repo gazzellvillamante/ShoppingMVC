@@ -26,13 +26,13 @@ namespace ShoppingMVC.DataAccess.Repository
         public async Task<IEnumerable<Product>> GetProducts(string searchTitle = "", int categoryId = 0)
         {
             var searchQuery = _db.Products
-                   .AsNoTracking()
-                   .Include(x => x.Category)
-                   .AsQueryable();
+                            .AsNoTracking()
+                            .Include(x => x.Category)
+                            .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(searchTitle))
             {
-                searchQuery = searchQuery.Where(b => b.Title.StartsWith(searchTitle.ToLower()));
+                searchQuery = searchQuery.Where(b => EF.Functions.Like(b.Title, $"%{searchTitle}%"));
             }
 
             if (categoryId > 0)
@@ -41,7 +41,6 @@ namespace ShoppingMVC.DataAccess.Repository
             }
 
             var books = await searchQuery
-                .AsNoTracking()
                 .Select(product => new Product
                 {
                     Id = product.Id,
@@ -53,6 +52,7 @@ namespace ShoppingMVC.DataAccess.Repository
                     Category = product.Category,
                     ISBN = product.ISBN
                 }).ToListAsync();
+
             return books;
         }
     }

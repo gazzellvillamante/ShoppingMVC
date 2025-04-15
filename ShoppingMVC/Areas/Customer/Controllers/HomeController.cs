@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol.Core.Types;
+using ShoppingMVC.DataAccess.Data;
 using ShoppingMVC.DataAccess.Repository;
 using ShoppingMVC.DataAccess.Repository.IRepository;
 using ShoppingMVC.Models;
@@ -13,12 +15,14 @@ namespace ShoppingMVC.Areas.Customer.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHomeRepository _homeRepository;
+        private readonly ApplicationDbContext _dbContext;
 
-        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IHomeRepository homeRepository)
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IHomeRepository homeRepository, ApplicationDbContext dbContext)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _homeRepository = homeRepository;
+            _dbContext = dbContext;
         }
 
         public async Task<IActionResult> Index(string searchQuery = "", int categoryId = 0)
@@ -35,7 +39,6 @@ namespace ShoppingMVC.Areas.Customer.Controllers
             return View(productModel);
         }
 
-        
         public IActionResult Detail(int productId)
         {
             Product product = _unitOfWork.Product.Get(u=>u.Id== productId, includeProperties: "Category");
