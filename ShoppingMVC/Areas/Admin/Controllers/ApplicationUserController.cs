@@ -20,10 +20,23 @@ namespace ShoppingMVC.Areas.Admin.Controllers
             _unitOfWork = unitOfWork;
             //_webHostEnvironment = webHostEnvironment;
         }
-        public IActionResult Index()
+        public IActionResult Index(string? searchTerm)
         {
-            List<ApplicationUser> objUserList = _unitOfWork.ApplicationUser.GetAll().ToList();
-            return View(objUserList);
+            /**List<ApplicationUser> objUserList = _unitOfWork.ApplicationUser.GetAll().ToList();
+            return View(objUserList);**/
+
+            IEnumerable<ApplicationUser> objUserList = _unitOfWork.ApplicationUser.GetAll();
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                searchTerm = searchTerm.ToLower();
+                objUserList = objUserList.Where(u =>
+                    (!string.IsNullOrEmpty(u.Name) && u.Name.ToLower().Contains(searchTerm)) ||
+                    (!string.IsNullOrEmpty(u.UserName) && u.UserName.ToLower().Contains(searchTerm))
+                );
+            }
+
+            return View(objUserList.ToList());
         }
 
         public IActionResult Create()
