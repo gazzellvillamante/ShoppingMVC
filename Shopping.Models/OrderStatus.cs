@@ -11,6 +11,7 @@ namespace ShoppingMVC.Models
     [Table("OrderStatus")]
     public class OrderStatus
     {
+        [Key]
         public int Id { get; set; }
         [Required]
         public int StatusId { get; set; }

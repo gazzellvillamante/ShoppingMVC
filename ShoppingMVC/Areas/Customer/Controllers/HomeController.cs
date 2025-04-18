@@ -47,7 +47,19 @@ namespace ShoppingMVC.Areas.Customer.Controllers
 
         public IActionResult Privacy()
         {
-            return View();
+            return View("~/Views/Shared/_Privacy.cshtml");
+        }
+
+        public IActionResult Promotion()
+        {
+            IEnumerable<Promotion> promoList = _unitOfWork.Promotion.GetAll();
+            return View(promoList);
+        }
+
+        public IActionResult PromoDetail(int id)
+        {
+            Promotion promoList = _unitOfWork.Promotion.Get(u => u.Id == id);
+            return View(promoList);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

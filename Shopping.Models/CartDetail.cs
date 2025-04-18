@@ -11,6 +11,7 @@ namespace ShoppingMVC.Models
         [Table("CartDetail")]
     public class CartDetail
     {
+        [Key]
         public int Id { get; set; }
         [Required]
         public int ShoppingCartId { get; set; }

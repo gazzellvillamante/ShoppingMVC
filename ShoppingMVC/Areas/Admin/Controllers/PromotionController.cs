@@ -13,53 +13,52 @@ namespace ShoppingMVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = SD.Role_Admin)]
-    public class ProductController : Controller
-    {
-
+    public class PromotionController : Controller    {
+        
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
+        public PromotionController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
         }
         public IActionResult Index()
         {
-            List<Product> objProductList = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
-
-            return View(objProductList);
+            List<Promotion> objPromotionList = _unitOfWork.Promotion.GetAll().ToList();
+            
+            return View(objPromotionList);
         }
-
+               
 
         public IActionResult UpdateInsert(int? id)
         {
-            ProductVM productVM = new()
+            PromotionVM promotionVM = new()
             {
-                CategoryList = _unitOfWork.Category.GetAll().Select(u => new SelectListItem
+                PromotionList = _unitOfWork.Promotion.GetAll().Select(u => new SelectListItem
                 {
-                    Text = u.Name,
+                    Text = u.Title,
                     Value = u.Id.ToString()
 
                 }),
-                Product = new Product()
+                Promotion = new Promotion()
             };
 
             if (id == null || id == 0)
             {
                 // Create
-                return View(productVM);
+                return View(promotionVM);
             }
 
             else
             {
                 // Update
-                productVM.Product = _unitOfWork.Product.Get(u => u.Id == id);
-                return View(productVM);
+                promotionVM.Promotion = _unitOfWork.Promotion.Get(u=>u.Id==id);
+                return View(promotionVM);
             }
         }
 
         [HttpPost]
-        public IActionResult UpdateInsert(ProductVM productVM, IFormFile? file)
+        public IActionResult UpdateInsert(PromotionVM promotionVM, IFormFile? file)
         {
             if (ModelState.IsValid)
             {
@@ -68,12 +67,12 @@ namespace ShoppingMVC.Areas.Admin.Controllers
                 {
                     // Assign random name to a file
                     string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                    string productPath = Path.Combine(wwwRootPath, @"images\product");
+                    string promotionPath = Path.Combine(wwwRootPath, @"images\promotion");
 
-                    if (!string.IsNullOrEmpty(productVM.Product.ImageUrl))
+                    if (!string.IsNullOrEmpty(promotionVM.Promotion.ImageUrl)) 
                     {
                         // Delete old image
-                        var oldImagePath = Path.Combine(wwwRootPath, productVM.Product.ImageUrl.TrimStart('\\'));
+                        var oldImagePath = Path.Combine(wwwRootPath, promotionVM.Promotion.ImageUrl.TrimStart('\\'));
 
                         if (System.IO.File.Exists(oldImagePath))
                         {
@@ -81,68 +80,68 @@ namespace ShoppingMVC.Areas.Admin.Controllers
                         }
                     }
 
-                    using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
+                    using (var fileStream = new FileStream(Path.Combine(promotionPath, fileName), FileMode.Create))
                     {
                         file.CopyTo(fileStream);
                     }
 
-                    productVM.Product.ImageUrl = @"\images\product\" + fileName;
+                    promotionVM.Promotion.ImageUrl = @"\images\promotion\"+ fileName;
                 }
 
-                if (productVM.Product.Id == 0)
+                if(promotionVM.Promotion.Id == 0)
                 {
-                    _unitOfWork.Product.Add(productVM.Product);
+                    _unitOfWork.Promotion.Add(promotionVM.Promotion);
                 }
                 else
                 {
-                    _unitOfWork.Product.Update(productVM.Product);
+                    _unitOfWork.Promotion.Update(promotionVM.Promotion);
                 }
 
                 _unitOfWork.Save();
-                TempData["success"] = "Product created successfully";
+                TempData["success"] = "Promotion created successfully";
                 return RedirectToAction("Index");
             }
 
             else
             {
-                productVM.CategoryList = _unitOfWork.Category.GetAll().Select(u => new SelectListItem
+                promotionVM.PromotionList = _unitOfWork.Promotion.GetAll().Select(u => new SelectListItem
                 {
-                    Text = u.Name,
+                    Text = u.Title,
                     Value = u.Id.ToString()
 
                 });
 
-                return View(productVM);
+                return View(promotionVM);
             }
         }
+     
 
-
-        #region API CALLS
+       #region API CALLS
         [HttpGet]
         public IActionResult GetAll()
         {
-            List<Product> objProductList = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
-            return Json(new { data = objProductList });
+            List<Promotion> objPromotionList = _unitOfWork.Promotion.GetAll().ToList();
+            return Json(new { data = objPromotionList });
         }
 
         [HttpDelete]
         public IActionResult Delete(int? id)
         {
-            var prodToDelete = _unitOfWork.Product.Get(u => u.Id == id);
-            if (prodToDelete == null)
+            var promoToDelete = _unitOfWork.Promotion.Get(u => u.Id == id);
+            if (promoToDelete == null)
             {
                 return Json(new { success = false, message = "Error while deleting" });
             }
 
-            var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, prodToDelete.ImageUrl.TrimStart('\\'));
+            var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, promoToDelete.ImageUrl.TrimStart('\\'));
 
             if (System.IO.File.Exists(oldImagePath))
             {
                 System.IO.File.Delete(oldImagePath);
             }
 
-            // Remove the product to be deleted
-            _unitOfWork.Product.Delete(prodToDelete);
+            // Remove the promotion to be deleted
+            _unitOfWork.Promotion.Delete(promoToDelete);
             _unitOfWork.Save();
 
             return Json(new { success = true, message = "Successfully deleted!" });

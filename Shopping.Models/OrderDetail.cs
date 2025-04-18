@@ -13,6 +13,7 @@ namespace ShoppingMVC.Models
     [Table("OrderDetail")]
     public class OrderDetail
     {
+        [Key]
         public int Id { get; set; }
         [Required]
         public int OrderId { get; set; }

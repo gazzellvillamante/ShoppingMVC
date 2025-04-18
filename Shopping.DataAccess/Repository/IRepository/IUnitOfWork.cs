@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ShoppingMVC.Models;
 
 namespace ShoppingMVC.DataAccess.Repository.IRepository
 {
@@ -11,6 +12,7 @@ namespace ShoppingMVC.DataAccess.Repository.IRepository
         ICategoryRepository Category { get; }
         IProductRepository Product { get; }
         IApplicationUserRepository ApplicationUser { get; }
+        IPromotionRepository Promotion { get; }
 
         void Save();
     }

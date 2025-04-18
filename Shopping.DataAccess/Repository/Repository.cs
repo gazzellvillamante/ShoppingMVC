@@ -46,7 +46,7 @@ public class Repository<T> : IRepository<T> where T : class
 
         return query.FirstOrDefault();
     }
-    
+
     public IEnumerable<T> GetAll(string? includeProperties = null)
     {
         IQueryable<T> query = dbSet;
@@ -57,7 +57,7 @@ public class Repository<T> : IRepository<T> where T : class
                 query = query.Include(property);
             }
         }
-        return query.ToList(); 
+        return query.ToList();
     }
 
     public void Delete(T entity)

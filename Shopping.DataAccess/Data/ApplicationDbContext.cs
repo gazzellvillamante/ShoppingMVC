@@ -21,6 +21,8 @@ namespace ShoppingMVC.DataAccess.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<OrderStatus> OrderStatuses { get; set; }
+        public DbSet<Promotion> Promotions { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -138,6 +140,34 @@ namespace ShoppingMVC.DataAccess.Data
                 ImageUrl = "",
                 Stock = 10
             }
+            );
+
+            modelBuilder.Entity<Promotion>().HasData(
+            new Promotion
+            {
+                Id = 1,
+                Title = "🔥 20% Off All Fiction Books!",
+                Description = "Now’s the perfect time to grow your bookshelf! Enjoy 20% off all fiction titles—whether you're chasing epic adventures or cozy reads. Your next favorite book is just a page away.",
+                ImageUrl = "", 
+                ExpiryDate = DateTime.Today.AddDays(30)
+            },
+            new Promotion
+            {
+                Id = 2,
+                Title = "📚 Buy 2 Get 1 Free!",
+                Description = "Treat yourself to some new books! Buy any two, and we’ll throw in a third one for free. From exciting adventures to heartfelt stories, there’s something for every reader. Don’t miss out—stock up today!",
+                ImageUrl = "", 
+                ExpiryDate = DateTime.Today.AddDays(10),
+            },
+            new Promotion
+            {
+                Id = 3,
+                Title = "🎉 Free Shipping Over $50!",
+                Description = "Enjoy the convenience of free shipping when you spend $50 or more! It’s the perfect time to shop your favorites and have them delivered straight to your door, on us. Don't wait—free shipping is just a few clicks away!",
+                ImageUrl = "",
+                ExpiryDate = DateTime.Today.AddDays(15)
+            }
+
             );
         }
 

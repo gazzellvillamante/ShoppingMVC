@@ -22,8 +22,7 @@ namespace ShoppingMVC.Areas.Admin.Controllers
         }
         public IActionResult Index(string? searchTerm)
         {
-            /**List<ApplicationUser> objUserList = _unitOfWork.ApplicationUser.GetAll().ToList();
-            return View(objUserList);**/
+            
 
             IEnumerable<ApplicationUser> objUserList = _unitOfWork.ApplicationUser.GetAll();
 

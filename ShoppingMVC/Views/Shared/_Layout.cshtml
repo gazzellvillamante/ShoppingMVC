@@ -30,6 +30,11 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="Customer" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        <li class="nav-item">                            
+                            <a class="nav-link" asp-area="Customer" asp-controller="Home" asp-action="Promotion">
+                                <i class="bi bi-fire me-2" style="color: #ff6600;"></i>Promotions
+                            </a>
+                        </li>
 
                         @if(User.IsInRole(Shopping.Utility.SD.Role_Admin)){
                             <li class="nav-item dropdown">
@@ -45,6 +50,9 @@
                                     </li>
                                     <li class="nav-item">
                                         <a class="dropdown-item" asp-area="Admin" asp-controller="ApplicationUser" asp-action="Index">User</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Promotion" asp-action="Index">Promotion</a>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
                                 </ul>
@@ -96,5 +104,4 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
-
 
