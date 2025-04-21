@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Shopping.Utility;
@@ -15,27 +16,59 @@ namespace ShoppingMVC.Areas.Admin.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        public ApplicationUserController(IUnitOfWork unitOfWork) //, IWebHostEnvironment webHostEnvironment
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        public ApplicationUserController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager) //, IWebHostEnvironment webHostEnvironment
         {
             _unitOfWork = unitOfWork;
+            _userManager = userManager;
+            _roleManager = roleManager;
             //_webHostEnvironment = webHostEnvironment;
         }
-        public IActionResult Index(string? searchTerm)
+        public async Task<IActionResult> Index(string? searchTerm, string? roleFilter)
         {
-            
-
-            IEnumerable<ApplicationUser> objUserList = _unitOfWork.ApplicationUser.GetAll();
+            var users = _userManager.Users.ToList();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 searchTerm = searchTerm.ToLower();
-                objUserList = objUserList.Where(u =>
+                users = users.Where(u =>
                     (!string.IsNullOrEmpty(u.Name) && u.Name.ToLower().Contains(searchTerm)) ||
                     (!string.IsNullOrEmpty(u.UserName) && u.UserName.ToLower().Contains(searchTerm))
-                );
+                ).ToList();
             }
 
-            return View(objUserList.ToList());
+            var userWithRoles = new List<ApplicationUserWithRoleVM>();
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                var role = roles.FirstOrDefault() ?? "No Role";
+
+                // Filter by role if needed
+                if (!string.IsNullOrEmpty(roleFilter) && role != roleFilter)
+                    continue;
+
+                userWithRoles.Add(new ApplicationUserWithRoleVM
+                {
+                    User = user,
+                    Role = role
+                });
+            }
+
+            var allRoles = _roleManager.Roles.Select(r => new SelectListItem
+            {
+                Value = r.Name,
+                Text = r.Name
+            }).ToList();
+
+            var viewModel = new UserVM
+            {
+                Users = userWithRoles,
+                Roles = allRoles,
+                RoleFilter = roleFilter
+            };
+
+            return View(viewModel);
         }
 
         public IActionResult Create()
