@@ -581,24 +581,39 @@ namespace ShoppingMVC.DataAccess.Migrations
                         new
                         {
                             Id = 1,
+<<<<<<< HEAD
                             Description = "Enjoy a hot discount on all fiction titles this month.",
                             ExpiryDate = new DateTime(2025, 5, 18, 0, 0, 0, 0, DateTimeKind.Local),
+=======
+                            Description = "Now’s the perfect time to grow your bookshelf! Enjoy 20% off all fiction titles—whether you're chasing epic adventures or cozy reads. Your next favorite book is just a page away.",
+                            ExpiryDate = new DateTime(2025, 5, 22, 0, 0, 0, 0, DateTimeKind.Local),
+>>>>>>> 11a37a0b52d60e5130eac3a3ad1e57302b1d8a34
                             ImageUrl = "",
                             Title = "🔥 20% Off All Fiction Books!"
                         },
                         new
                         {
                             Id = 2,
+<<<<<<< HEAD
                             Description = "Mix and match your favorite reads.",
                             ExpiryDate = new DateTime(2025, 4, 28, 0, 0, 0, 0, DateTimeKind.Local),
+=======
+                            Description = "Treat yourself to some new books! Buy any two, and we’ll throw in a third one for free. From exciting adventures to heartfelt stories, there’s something for every reader. Don’t miss out—stock up today!",
+                            ExpiryDate = new DateTime(2025, 5, 2, 0, 0, 0, 0, DateTimeKind.Local),
+>>>>>>> 11a37a0b52d60e5130eac3a3ad1e57302b1d8a34
                             ImageUrl = "",
                             Title = "📚 Buy 2 Get 1 Free!"
                         },
                         new
                         {
                             Id = 3,
+<<<<<<< HEAD
                             Description = "Order over $50 and get free standard shipping.",
                             ExpiryDate = new DateTime(2025, 5, 3, 0, 0, 0, 0, DateTimeKind.Local),
+=======
+                            Description = "Enjoy the convenience of free shipping when you spend $50 or more! It’s the perfect time to shop your favorites and have them delivered straight to your door, on us. Don't wait—free shipping is just a few clicks away!",
+                            ExpiryDate = new DateTime(2025, 5, 7, 0, 0, 0, 0, DateTimeKind.Local),
+>>>>>>> 11a37a0b52d60e5130eac3a3ad1e57302b1d8a34
                             ImageUrl = "",
                             Title = "🎉 Free Shipping Over $50!"
                         });

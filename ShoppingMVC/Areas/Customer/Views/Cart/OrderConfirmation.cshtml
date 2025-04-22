@@ -1,0 +1,67 @@
+﻿@using ShoppingMVC.Models
+@model ShoppingMVC.Models.ViewModels.OrderConfirmationVM
+
+@{
+    ViewData["Title"] = "Order Confirmation";
+}
+
+<h1>Your Order Has Been Confirmed!</h1>
+<p>Thank you for your support!</p>
+
+@if (Model != null)
+{
+    <div>
+        <h3>Shipping Information:</h3>
+        <p><strong>Name:</strong> @Model.ShippingDetails.Name</p>
+        <p><strong>Phone Number:</strong> @Model.ShippingDetails.PhoneNumber</p>
+        <p><strong>Address:</strong> @Model.ShippingDetails.Address</p>
+    </div>
+
+    <hr />
+
+    <div>
+        <h3>Order Details:</h3>
+        @if (Model.CartDetails != null && Model.CartDetails.Any())
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.CartDetails)
+                    {
+                        <tr>
+                            <td>@item.Product.Title</td>
+                            <td>@item.Quantity</td>
+                            <td>@($"{item.Product.ListPrice:C}")</td>
+                            <td>@($"{item.Product.ListPrice * item.Quantity:C}")</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-right"><strong>Order Total:</strong></td>
+                        <td>@Model.OrderTotal.ToString("c")</td>
+                    </tr>
+                </tfoot>
+            </table>
+        }
+        else
+        {
+            <p>No items in this order.</p>
+        }
+    </div>
+
+    <div class="my-2">
+        <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-primary">Back to Home</a>
+    </div>
+}
+else
+{
+    <p>No order information found.</p>
+}
