@@ -11,7 +11,7 @@ namespace ShoppingMVC.Models.ViewModels
     {
         public List<ApplicationUserWithRoleVM> Users { get; set; }
         public List<SelectListItem> Roles { get; set; }
-        public string RoleFilter { get; set; }  // To keep selected role
+        public string RoleFilter { get; set; }  
         
     }
 }

@@ -39,12 +39,22 @@ builder.Services.AddScoped<IEmailSender,EmailSender>();
 
 var app = builder.Build();
 
+
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+/**if (!app.Environment.IsDevelopment())
 {
+    app.UseExceptionHandler("/Error/500");
+    app.UseStatusCodePagesWithReExecute("/Error/{0}");
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}**/
+
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error/Error500"); // For unhandled exceptions
+    app.UseStatusCodePagesWithReExecute("/Error/Error{0}"); // For 404, 403, etc.
 }
 
 app.UseHttpsRedirection();
