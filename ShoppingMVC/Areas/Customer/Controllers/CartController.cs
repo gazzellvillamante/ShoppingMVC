@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using ShoppingMVC.DataAccess.Repository;
 using ShoppingMVC.DataAccess.Repository.IRepository;
+using ShoppingMVC.Models;
+using ShoppingMVC.Extensions;
+using ShoppingMVC.Models.ViewModels;
 
 namespace ShoppingMVC.Areas.Customer.Controllers
 {
@@ -53,32 +56,48 @@ namespace ShoppingMVC.Areas.Customer.Controllers
         [Route("Cart/Checkout")]
         public IActionResult Checkout()
         {
-            TempData["success"] = "Category created successfully";
-            return View("Index");
+            return View(); // Checkout
         }
 
-        /**
+        [Route("Cart/OrderConfirmation")]
+        public async Task<IActionResult> OrderConfirmation()
+        {
+            // Retrieve the shipping details from the session
+            var shippingDetails = HttpContext.Session.GetObjectFromJson<ShippingDetails>("ShippingDetails");
+
+            // Retrieve the user's cart (which now includes CartDetails)
+            var cart = await _cartRepo.GetUserCart();
+
+            if (shippingDetails != null && cart != null && cart.CartDetails != null && cart.CartDetails.Any())
+            {
+                // Create the view model
+                var confirmationViewModel = new OrderConfirmationVM
+                {
+                    ShippingDetails = shippingDetails,
+                    CartDetails = cart.CartDetails.ToList(),
+                    OrderTotal = cart.CartDetails.Sum(item => item.Product.ListPrice * item.Quantity)
+                };
+
+                return View(confirmationViewModel);
+            }
+            else
+            {
+                return RedirectToAction("GetUserCart");
+            }
+        }
 
         [HttpPost]
-        public async Task<IActionResult> Checkout(CheckoutModel model)
+        [Route("Cart/Checkout")]
+        public IActionResult Checkout(ShippingDetails shippingDetails)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-            bool isCheckedOut = await _cartRepo.DoCheckout(model);
-            if (!isCheckedOut)
-                return RedirectToAction(nameof(OrderFailure));
-            return RedirectToAction(nameof(OrderSuccess));
-        }
+            if (ModelState.IsValid)
+            {
+                HttpContext.Session.SetObjectAsJson("ShippingDetails", shippingDetails);
+                return RedirectToAction("OrderConfirmation");
+            }
 
-        public IActionResult OrderSuccess()
-        {
-            return View();
+            
+            return View(shippingDetails);
         }
-
-        public IActionResult OrderFailure()
-        {
-            return View();
-        }
-       **/
     }
 }

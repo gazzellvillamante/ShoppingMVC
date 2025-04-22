@@ -12,7 +12,7 @@ using ShoppingMVC.DataAccess.Data;
 namespace ShoppingMVC.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250323235408_addTables")]
+    [Migration("20250422022921_addTables")]
     partial class addTables
     {
         /// <inheritdoc />
@@ -552,6 +552,58 @@ namespace ShoppingMVC.DataAccess.Migrations
                             ListPrice = 40,
                             Stock = 10,
                             Title = "Pakeha Slaves, Maori Masters"
+                        });
+                });
+
+            modelBuilder.Entity("ShoppingMVC.Models.Promotion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Promotions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Now’s the perfect time to grow your bookshelf! Enjoy 20% off all fiction titles—whether you're chasing epic adventures or cozy reads. Your next favorite book is just a page away.",
+                            ExpiryDate = new DateTime(2025, 5, 22, 0, 0, 0, 0, DateTimeKind.Local),
+                            ImageUrl = "",
+                            Title = "🔥 20% Off All Fiction Books!"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Treat yourself to some new books! Buy any two, and we’ll throw in a third one for free. From exciting adventures to heartfelt stories, there’s something for every reader. Don’t miss out—stock up today!",
+                            ExpiryDate = new DateTime(2025, 5, 2, 0, 0, 0, 0, DateTimeKind.Local),
+                            ImageUrl = "",
+                            Title = "📚 Buy 2 Get 1 Free!"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Enjoy the convenience of free shipping when you spend $50 or more! It’s the perfect time to shop your favorites and have them delivered straight to your door, on us. Don't wait—free shipping is just a few clicks away!",
+                            ExpiryDate = new DateTime(2025, 5, 7, 0, 0, 0, 0, DateTimeKind.Local),
+                            ImageUrl = "",
+                            Title = "🎉 Free Shipping Over $50!"
                         });
                 });
 
