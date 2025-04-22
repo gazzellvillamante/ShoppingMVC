@@ -552,6 +552,58 @@ namespace ShoppingMVC.DataAccess.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ShoppingMVC.Models.Promotion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Promotions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Enjoy a hot discount on all fiction titles this month.",
+                            ExpiryDate = new DateTime(2025, 5, 18, 0, 0, 0, 0, DateTimeKind.Local),
+                            ImageUrl = "",
+                            Title = "🔥 20% Off All Fiction Books!"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Mix and match your favorite reads.",
+                            ExpiryDate = new DateTime(2025, 4, 28, 0, 0, 0, 0, DateTimeKind.Local),
+                            ImageUrl = "",
+                            Title = "📚 Buy 2 Get 1 Free!"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Order over $50 and get free standard shipping.",
+                            ExpiryDate = new DateTime(2025, 5, 3, 0, 0, 0, 0, DateTimeKind.Local),
+                            ImageUrl = "",
+                            Title = "🎉 Free Shipping Over $50!"
+                        });
+                });
+
             modelBuilder.Entity("ShoppingMVC.Models.ShoppingCart", b =>
                 {
                     b.Property<int>("Id")

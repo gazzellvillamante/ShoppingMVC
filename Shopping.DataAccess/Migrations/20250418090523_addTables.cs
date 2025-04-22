@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ShoppingMVC.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class addingTables : Migration
+    public partial class addTables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -84,6 +84,22 @@ namespace ShoppingMVC.DataAccess.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_OrderStatus", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Promotions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Promotions", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -328,6 +344,16 @@ namespace ShoppingMVC.DataAccess.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Promotions",
+                columns: new[] { "Id", "Description", "ExpiryDate", "ImageUrl", "Title" },
+                values: new object[,]
+                {
+                    { 1, "Enjoy a hot discount on all fiction titles this month.", new DateTime(2025, 5, 18, 0, 0, 0, 0, DateTimeKind.Local), "", "🔥 20% Off All Fiction Books!" },
+                    { 2, "Mix and match your favorite reads.", new DateTime(2025, 4, 28, 0, 0, 0, 0, DateTimeKind.Local), "", "📚 Buy 2 Get 1 Free!" },
+                    { 3, "Order over $50 and get free standard shipping.", new DateTime(2025, 5, 3, 0, 0, 0, 0, DateTimeKind.Local), "", "🎉 Free Shipping Over $50!" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Products",
                 columns: new[] { "Id", "Author", "CategoryId", "Description", "ISBN", "ImageUrl", "ListPrice", "Stock", "Title" },
                 values: new object[,]
@@ -435,6 +461,9 @@ namespace ShoppingMVC.DataAccess.Migrations
 
             migrationBuilder.DropTable(
                 name: "OrderDetail");
+
+            migrationBuilder.DropTable(
+                name: "Promotions");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
