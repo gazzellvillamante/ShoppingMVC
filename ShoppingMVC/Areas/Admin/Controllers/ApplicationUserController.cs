@@ -18,11 +18,13 @@ namespace ShoppingMVC.Areas.Admin.Controllers
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public ApplicationUserController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager) //, IWebHostEnvironment webHostEnvironment
+        private readonly ILogger<ApplicationUserController> _logger;
+        public ApplicationUserController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, ILogger<ApplicationUserController> logger) //, IWebHostEnvironment webHostEnvironment
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _roleManager = roleManager;
+            _logger = logger;
             //_webHostEnvironment = webHostEnvironment;
         }
         public async Task<IActionResult> Index(string? searchTerm, string? roleFilter)
@@ -73,44 +75,185 @@ namespace ShoppingMVC.Areas.Admin.Controllers
 
         public IActionResult Create()
         {
-            return View();
+            var roles = _roleManager.Roles
+                .Select(r => new SelectListItem
+                {
+                    Text = r.Name,
+                    Value = r.Name
+                });
+
+            var model = new CreateUpdateUserViewModel
+            {
+                RoleList = roles
+            };
+
+            return View(model);
         }
 
         [HttpPost]
-        public IActionResult Create(ApplicationUser obj)
+        public async Task<IActionResult> Create(CreateUpdateUserViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _unitOfWork.ApplicationUser.Add(obj);
-                _unitOfWork.Save();
+                foreach (var state in ModelState)
+                {
+                    foreach (var error in state.Value.Errors)
+                    {
+                        _logger.LogWarning("Validation error in {Field}: {Error}", state.Key, error.ErrorMessage);
+                    }
+                }
+
+                // Re-populate RoleList before returning view
+                model.RoleList = _roleManager.Roles.Select(r => new SelectListItem
+                {
+                    Text = r.Name,
+                    Value = r.Name
+                });
+
+                return View(model);
+            }
+
+            var newUser = new ApplicationUser
+            {
+                UserName = model.UserName,
+                Name = model.Name,
+                Street = model.Street,
+                City = model.City,
+                Suburb = model.Suburb,
+                PostCode = model.PostCode
+            };
+
+            var result = await _userManager.CreateAsync(newUser, model.Password);
+
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(newUser, model.Role);
+
                 TempData["success"] = "User created successfully";
-                return RedirectToAction("Index", "ApplicationUser");
+                return RedirectToAction("Index");
             }
-            return View();
+
+            // 🔍 Identity creation errors
+            foreach (var error in result.Errors)
+            {
+                Console.WriteLine($"Identity Error: {error.Code} - {error.Description}");
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            model.RoleList = _roleManager.Roles.Select(r => new SelectListItem
+            {
+                Text = r.Name,
+                Value = r.Name
+            });
+
+            return View(model);
         }
 
-        public IActionResult Edit(string? id)
+        public async Task<IActionResult> Edit(string id)
         {
-            ApplicationUser? userfromDb = _unitOfWork.ApplicationUser.Get(u => u.Id == id);
-
-            if (userfromDb == null)
-            {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
                 return NotFound();
-            }
-            return View(userfromDb);
+
+            var roles = await _userManager.GetRolesAsync(user);
+            var currentRole = roles.FirstOrDefault();
+
+            var model = new CreateUpdateUserViewModel
+            {
+                Name = user.Name,
+                UserName = user.UserName,
+                Street = user.Street,
+                City = user.City,
+                Suburb = user.Suburb,
+                PostCode = user.PostCode,
+                Role = currentRole ?? "",
+                RoleList = _roleManager.Roles.Select(r => new SelectListItem
+                {
+                    Text = r.Name,
+                    Value = r.Name
+                })
+            };
+
+
+
+            return View("Edit", model); // You can reuse the Create view or make a copy named Edit.cshtml
         }
 
         [HttpPost]
-        public IActionResult Edit(ApplicationUser obj)
+        public async Task<IActionResult> Edit(string id, CreateUpdateUserViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _unitOfWork.ApplicationUser.Update(obj);
-                _unitOfWork.Save();
-                TempData["success"] = "User updated successfully";
-                return RedirectToAction("Index", "ApplicationUser");
+                model.RoleList = _roleManager.Roles.Select(r => new SelectListItem
+                {
+                    Text = r.Name,
+                    Value = r.Name
+                });
+                return View(model);
             }
-            return View();
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                return NotFound();
+
+            // Update user properties
+            user.Name = model.Name;
+            user.UserName = model.UserName;
+            user.Street = model.Street;
+            user.City = model.City;
+            user.Suburb = model.Suburb;
+            user.PostCode = model.PostCode;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!string.IsNullOrEmpty(model.Role))
+            {
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                await _userManager.AddToRoleAsync(user, model.Role);
+            }
+
+            if (!string.IsNullOrWhiteSpace(model.Password))
+            {
+                // Remove old password (if set), then reset it
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var resetPassResult = await _userManager.ResetPasswordAsync(user, token, model.Password);
+
+                if (!resetPassResult.Succeeded)
+                {
+                    foreach (var error in resetPassResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+
+                    model.RoleList = _roleManager.Roles.Select(r => new SelectListItem
+                    {
+                        Text = r.Name,
+                        Value = r.Name
+                    });
+
+                    return View(model);
+                }
+            }
+
+            if (result.Succeeded)
+            {
+                TempData["success"] = "User updated successfully";
+                return RedirectToAction("Index");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            model.RoleList = _roleManager.Roles.Select(r => new SelectListItem
+            {
+                Text = r.Name,
+                Value = r.Name
+            });
+
+            return View(model);
         }
 
         public IActionResult Delete(string? id)
