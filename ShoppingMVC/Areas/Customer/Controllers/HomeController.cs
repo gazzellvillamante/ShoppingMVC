@@ -47,7 +47,7 @@ namespace ShoppingMVC.Areas.Customer.Controllers
 
         public IActionResult Privacy()
         {
-            return View("~/Views/Shared/_Privacy.cshtml");
+            return View("~/Views/Shared/Privacy.cshtml");
         }
 
         public IActionResult Promotion()

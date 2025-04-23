@@ -37,6 +37,18 @@ builder.Services.AddRazorPages();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IEmailSender,EmailSender>();
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Identity/Account/Login";
+    options.LogoutPath = "/Identity/Account/Logout";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = 401;
+        return Task.CompletedTask;
+    };
+});
+
 
 var app = builder.Build();
 
@@ -54,8 +66,8 @@ var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error/Error500"); // For unhandled exceptions
-    app.UseStatusCodePagesWithReExecute("/Error/Error{0}"); // For 404, 403, etc.
+    app.UseExceptionHandler("/Error");
+    app.UseStatusCodePagesWithReExecute("/Customer/Error/Error{0}");
 }
 
 app.UseHttpsRedirection();
@@ -70,5 +82,10 @@ app.MapRazorPages();
 app.MapControllerRoute(
     name: "default",
     pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
+    name: "404",
+    pattern: "{*url}",
+    defaults: new { area = "Customer", controller = "Error", action = "Error404" });
 
 app.Run();

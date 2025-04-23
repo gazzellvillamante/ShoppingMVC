@@ -2,16 +2,32 @@
 
 namespace ShoppingMVC.Areas.Customer.Controllers
 {
+    [Area("Customer")]
+    [Route("Customer/Error")]
     public class ErrorController : Controller
     {
-        public IActionResult Error404()
+        [Route("Error{code}")]
+        public IActionResult ErrorHandler(int code)
         {
-            return View("NotFound");
+            if (code == 404)
+                return View("NotFound");
+            if (code == 500)
+                return View("Error");
+
+            // Optionally handle other codes
+            return View("GenericError");
         }
 
-        public IActionResult Error500()
+        [Route("/Error")]
+        public IActionResult Error()
         {
             return View("Error");
+        }
+
+        [Route("Customer/Error")]
+        public IActionResult Crash()
+        {
+            throw new Exception("This is a test crash to trigger 500 error.");
         }
     }
 }

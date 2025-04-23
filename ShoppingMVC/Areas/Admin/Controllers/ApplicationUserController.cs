@@ -256,15 +256,33 @@ namespace ShoppingMVC.Areas.Admin.Controllers
             return View(model);
         }
 
-        public IActionResult Delete(string? id)
+        public async Task<IActionResult> Delete(string? id)
         {
-            ApplicationUser? userfromDb = _unitOfWork.ApplicationUser.Get(u => u.Id == id);
-
-            if (userfromDb == null)
+            var userFromDb = await _userManager.FindByIdAsync(id);
+            if (userFromDb == null)
             {
                 return NotFound();
             }
-            return View(userfromDb);
+
+            var roles = await _userManager.GetRolesAsync(userFromDb);
+
+            var model = new CreateUpdateUserViewModel
+            {
+                Name = userFromDb.Name,
+                UserName = userFromDb.UserName,
+                Street = userFromDb.Street,
+                City = userFromDb.City,
+                Suburb = userFromDb.Suburb,
+                PostCode = userFromDb.PostCode,
+                Role = roles.FirstOrDefault(),
+                RoleList = _roleManager.Roles.Select(r => new SelectListItem
+                {
+                    Text = r.Name,
+                    Value = r.Name
+                })
+            };
+
+            return View(model);
         }
 
         [HttpPost, ActionName("Delete")]
